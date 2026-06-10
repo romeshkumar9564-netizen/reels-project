@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Reels Script Generator</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            text-align: center;
+            color: #fff;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background-color: #0f172a;
+            color: #fff;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        button:disabled {
+            background-color: #475569;
+            cursor: not-allowed;
+        }
+
+        .result-box {
+            margin-top: 24px;
+            padding: 20px;
+            background-color: #0f172a;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            display: none;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎬 AI Reels Script Generator</h1>
+    <p class="subtitle">Enter a topic to generate an engaging 30-second tech script</p>
+
+    <div class="form-group">
+        <label for="topic">Project / Topic Name</label>
+        <input type="text" id="topic" placeholder="e.g., Python Automation Tips, Cyber Security Basics...">
+    </div>
+
+    <button id="generateBtn" onclick="generateScript()">Generate Script</button>
+
+    <div class="loading" id="loadingText">Generating your script, please wait...</div>
+    <div class="result-box" id="resultBox"></div>
+</div>
+
+<script>
+    async function generateScript() {
+        const topicInput = document.getElementById('topic');
+        const generateBtn = document.getElementById('generateBtn');
+        const loadingText = document.getElementById('loadingText');
+        const resultBox = document.getElementById('resultBox');
+
+        const topic = topicInput.value.trim();
+        if (!topic) {
+            alert('Please enter a topic first, Bhai!');
+            return;
+        }
+
+        // UI Updates
+        generateBtn.disabled = true;
+        loadingText.style.display = 'block';
+        resultBox.style.display = 'none';
+
+        try {
+            // Note: Jab hum backend cloud par deploy karenge, tab ye URL Render ya Railway ke live link se replace hoga.
+            // Abhi local testing ke liye ye localhost par set hai.
+            const response = await fetch('http://127.0.0.1:8000/make-script', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ topic: topic })
+            });
+
+            if (!response.ok) {
+                throw new Error('Backend server is not responding properly.');
+            }
+
+            const data = await response.json();
+            
+            // Show Result
+            resultBox.innerText = data.script;
+            resultBox.style.display = 'block';
+        } catch (error) {
+            alert('Error: ' + error.message);
+        } finally {
+            // Reset UI
+            generateBtn.disabled = false;
+            loadingText.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
