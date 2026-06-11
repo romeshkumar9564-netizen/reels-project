@@ -1,13 +1,13 @@
 import os
 import json
 import urllib.request
+import ssl
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 app = FastAPI()
 
-# CORS bypass karne ke liye ekdum clear configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -29,33 +29,20 @@ async def make_script(request: TopicRequest):
     if not api_key:
         raise HTTPException(status_code=500, detail="API Key missing on Render!")
 
-    # Google Stable API Endpoint
     url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
-    
-    prompt = f"""
-    Write a highly engaging 30-second Instagram Reel script about the topic: "{request.topic}".
-    Language: Hinglish (Hindi written in Roman alphabet).
-    Format:
-    - **HOOK**: (First 3 seconds)
-    - **BODY**: (Main tips)
-    - **CTA**: (Follow for more)
-    """
+    prompt = f'Write a highly engaging 30-second Instagram Reel script about the topic: "{request.topic}". Language: Hinglish.'
 
-    payload = {
-        "contents": [{"parts": [{"text": prompt}]}]
-    }
-    
+    payload = {"contents": [{"parts": [{"text": prompt}]}]}
     data = json.dumps(payload).encode("utf-8")
     
-    req = urllib.request.Request(
-        url, 
-        data=data, 
-        headers={"Content-Type": "application/json"}, 
-        method="POST"
-    )
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    
+    req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"}, method="POST")
 
     try:
-        with urllib.request.urlopen(req) as response:
+        with urllib.request.urlopen(req, context=ctx) as response:
             res_data = json.loads(response.read().decode("utf-8"))
             script_text = res_data["candidates"][0]["content"]["parts"][0]["text"]
             return {"script": script_text}
