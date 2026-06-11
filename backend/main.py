@@ -29,21 +29,19 @@ def home():
 @app.post("/make-script")
 async def make_script(request: TopicRequest):
     try:
-        # Ekdum safe aur standard tarika model call karne ka
-        model = genai.GenerativeModel(model_name="gemini-1.5-flash")
-        
-        prompt = f"""
-        Write a highly engaging 30-second Instagram Reel script about the topic: "{request.topic}".
-        The content must be purely educational, focusing on tech awareness and best practices.
-        Language: Hinglish (Hindi written in Roman English alphabet).
-        Format the response exactly like this:
-        - **HOOK**: (First 3 seconds to grab attention)
-        - **BODY**: (Main valuable tips or info)
-        - **CTA**: (Ask users to like and follow)
-        """
-        
-        response = model.generate_content(prompt)
-        return {"script": response.text}
+        # Kuch system me 'gemini-1.5-flash' direct v1beta me error deta hai, 
+        # isliye hum pure standard string formatting backup use kar rahe hain.
+        try:
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            prompt = f"Write a highly engaging 30-second Instagram Reel script about the topic: '{request.topic}'. Language: Hinglish."
+            response = model.generate_content(prompt)
+            return {"script": response.text}
+        except Exception:
+            # Alternate model name format agar pehla fail ho jaye
+            model = genai.GenerativeModel('gemini-pro')
+            prompt = f"Write a highly engaging 30-second Instagram Reel script about the topic: '{request.topic}'. Language: Hinglish."
+            response = model.generate_content(prompt)
+            return {"script": response.text}
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
