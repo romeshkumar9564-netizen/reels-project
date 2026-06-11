@@ -29,8 +29,8 @@ def home():
 @app.post("/make-script")
 async def make_script(request: TopicRequest):
     try:
-        # Naya model initialization aur generate format
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # Ekdum safe aur standard tarika model call karne ka
+        model = genai.GenerativeModel(model_name="gemini-1.5-flash")
         
         prompt = f"""
         Write a highly engaging 30-second Instagram Reel script about the topic: "{request.topic}".
