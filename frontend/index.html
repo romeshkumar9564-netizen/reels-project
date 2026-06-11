@@ -5,185 +5,189 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Reels Script Generator</title>
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --accent-color: #3b82f6;
-            --accent-hover: #2563eb;
-            --text-color: #f8fafc;
-            --text-muted: #94a3b8;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
+            background: linear-gradient(135deg, #0f172a, #1e1b4b);
+            color: #f8fafc;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            padding: 20px;
         }
 
         .container {
+            background: rgba(30, 41, 259, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
             width: 100%;
             max-width: 600px;
-            background-color: var(--card-bg);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
         h1 {
-            font-size: 24px;
-            margin-bottom: 8px;
             text-align: center;
-            color: #fff;
+            margin-bottom: 10px;
+            font-size: 2rem;
+            background: linear-gradient(to right, #38bdf8, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         p.subtitle {
-            color: var(--text-muted);
             text-align: center;
-            font-size: 14px;
-            margin-bottom: 24px;
+            color: #94a3b8;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
         }
 
-        .form-group {
+        .input-group {
             margin-bottom: 20px;
         }
 
         label {
             display: block;
-            font-size: 14px;
-            font-weight: 600;
             margin-bottom: 8px;
-            color: var(--text-muted);
+            color: #cbd5e1;
+            font-weight: 500;
         }
 
         input[type="text"] {
             width: 100%;
-            padding: 12px 16px;
-            border-radius: 8px;
+            padding: 14px;
+            background: #0f172a;
             border: 1px solid #334155;
-            background-color: #0f172a;
+            border-radius: 10px;
             color: #fff;
-            font-size: 16px;
-            box-sizing: border-box;
-            transition: border-color 0.2s;
+            font-size: 1rem;
+            transition: all 0.3s;
         }
 
         input[type="text"]:focus {
             outline: none;
-            border-color: var(--accent-color);
+            border-color: #38bdf8;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
         }
 
         button {
             width: 100%;
             padding: 14px;
-            background-color: var(--accent-color);
-            color: white;
+            background: linear-gradient(to right, #38bdf8, #0284c7);
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
         }
 
         button:hover {
-            background-color: var(--accent-hover);
+            opacity: 0.9;
+            transform: translateY(-1px);
         }
 
         button:disabled {
-            background-color: #475569;
+            background: #334155;
+            color: #64748b;
             cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
         }
 
         .result-box {
-            margin-top: 24px;
-            padding: 20px;
-            background-color: #0f172a;
-            border-radius: 8px;
+            margin-top: 30px;
+            background: #0f172a;
             border: 1px solid #334155;
+            padding: 20px;
+            border-radius: 10px;
             display: none;
             white-space: pre-wrap;
             line-height: 1.6;
+            color: #e2e8f0;
         }
 
-        .loading {
+        .loader {
             display: none;
             text-align: center;
-            margin-top: 15px;
-            color: var(--accent-color);
+            margin-top: 20px;
+            color: #38bdf8;
             font-weight: 500;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>🎬 AI Reels Script Generator</h1>
-    <p class="subtitle">Enter a topic to generate an engaging 30-second tech script</p>
+    <div class="container">
+        <h1>AI Reels Script Generator</h1>
+        <p class="subtitle">Enter your topic and get a high-engaging Hinglish script in seconds!</p>
 
-    <div class="form-group">
-        <label for="topic">Project / Topic Name</label>
-        <input type="text" id="topic" placeholder="e.g., Python Automation Tips, Cyber Security Basics...">
+        <div class="input-group">
+            <label for="topic">Reel Topic</label>
+            <input type="text" id="topic" placeholder="e.g., Python Tips, Cyber Security Basics...">
+        </div>
+
+        <button id="generateBtn">Generate Script ✨</button>
+
+        <div class="loader" id="loader">Generating your amazing script... Please wait... 🚀</div>
+        <div class="result-box" id="resultBox"></div>
     </div>
 
-    <button id="generateBtn" onclick="generateScript()">Generate Script</button>
+    <script>
+        document.getElementById('generateBtn').addEventListener('click', async () => {
+            const topicInput = document.getElementById('topic');
+            const generateBtn = document.getElementById('generateBtn');
+            const loader = document.getElementById('loader');
+            const resultBox = document.getElementById('resultBox');
 
-    <div class="loading" id="loadingText">Generating your script, please wait...</div>
-    <div class="result-box" id="resultBox"></div>
-</div>
-
-<script>
-    async function generateScript() {
-        const topicInput = document.getElementById('topic');
-        const generateBtn = document.getElementById('generateBtn');
-        const loadingText = document.getElementById('loadingText');
-        const resultBox = document.getElementById('resultBox');
-
-        const topic = topicInput.value.trim();
-        if (!topic) {
-            alert('Please enter a topic first, Bhai!');
-            return;
-        }
-
-        // UI Updates
-        generateBtn.disabled = true;
-        loadingText.style.display = 'block';
-        resultBox.style.display = 'none';
-
-        try {
-            // Note: Jab hum backend cloud par deploy karenge, tab ye URL Render ya Railway ke live link se replace hoga.
-            // Abhi local testing ke liye ye localhost par set hai.
-            const response = await fetch('http://127.0.0.1:8000/make-script', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ topic: topic })
-            });
-
-            if (!response.ok) {
-                throw new Error('Backend server is not responding properly.');
+            const topic = topicInput.value.trim();
+            if (!topic) {
+                alert('Please enter a topic first, bhai!');
+                return;
             }
 
-            const data = await response.json();
-            
-            // Show Result
-            resultBox.innerText = data.script;
-            resultBox.style.display = 'block';
-        } catch (error) {
-            alert('Error: ' + error.message);
-        } finally {
-            // Reset UI
-            generateBtn.disabled = false;
-            loadingText.style.display = 'none';
-        }
-    }
-</script>
+            // UI Reset
+            generateBtn.disabled = true;
+            loader.style.display = 'block';
+            resultBox.style.display = 'none';
+            resultBox.innerHTML = '';
 
+            try {
+                // Render ka live URL link kiya hai yahan
+                const response = await fetch('https://reels-project.onrender.com/make-script', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ topic: topic })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultBox.innerHTML = data.script;
+                    resultBox.style.display = 'block';
+                } else {
+                    resultBox.innerHTML = `Error: ${data.detail || 'Something went wrong!'}`;
+                    resultBox.style.display = 'block';
+                }
+            } catch (error) {
+                resultBox.innerHTML = `Failed to connect to backend: ${error.message}`;
+                resultBox.style.display = 'block';
+            } finally {
+                generateBtn.disabled = false;
+                loader.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
