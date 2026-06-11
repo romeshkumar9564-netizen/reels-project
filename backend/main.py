@@ -29,10 +29,10 @@ async def make_script(request: TopicRequest):
     if not api_key:
         raise HTTPException(status_code=500, detail="API Key missing on Render!")
 
-    # Google Gemini 1.5 Flash - Nayi Key ke liye v1beta endpoint mandatory hai
+    # Naye keys ke liye ekdum exact aur updated global v1beta endpoint format
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
     
-    prompt = f"Write a highly engaging 30-second Instagram Reel script about the topic: '{request.topic}'. Language: Hinglish. Format it with clearly marked HOOK, BODY, and CTA."
+    prompt = f"Write a highly engaging 30-second Instagram Reel script about the topic: '{request.topic}'. Language: Hinglish. Format with clear HOOK, BODY, and CTA."
 
     payload = {
         "contents": [{
@@ -42,7 +42,7 @@ async def make_script(request: TopicRequest):
     
     data = json.dumps(payload).encode("utf-8")
     
-    # SSL Bypass aur Cloud Environment standard headers
+    # SSL Validation Bypass for Cloud Environments
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
@@ -51,8 +51,7 @@ async def make_script(request: TopicRequest):
         url, 
         data=data, 
         headers={
-            "Content-Type": "application/json",
-            "User-Agent": "Mozilla/5.0"
+            "Content-Type": "application/json"
         }, 
         method="POST"
     )
@@ -63,4 +62,4 @@ async def make_script(request: TopicRequest):
             script_text = res_data["candidates"][0]["content"]["parts"][0]["text"]
             return {"script": script_text}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Google API Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Google API Connection Error: {str(e)}")
