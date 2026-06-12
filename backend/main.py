@@ -39,10 +39,13 @@ async def make_script(request: TopicRequest):
 
     command = [
         "curl",
+    command = [
+        "curl",
         "-X", "POST",
-        f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}",
+        f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={api_key}",
         "-H", "Content-Type: application/json",
         "-d", json.dumps(payload)
+    ]
     ]
 
     try:
