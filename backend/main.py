@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
+# CORS Middleware setup for smooth frontend-backend connection
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -30,15 +31,14 @@ async def make_script(request: TopicRequest):
 
     prompt = f"Write a 30-second Instagram Reel script about the topic: '{request.topic}'. Language: Hinglish."
 
-    # Standard production payload format for Gemini 1.5 Flash
+    # Standard production payload format for Gemini
     payload = {
         "contents": [{
             "parts": [{"text": prompt}]
         }]
     }
 
-    command = [
-        "curl",
+    # Direct cURL command with perfect comma formatting to avoid syntax errors
     command = [
         "curl",
         "-X", "POST",
@@ -46,13 +46,13 @@ async def make_script(request: TopicRequest):
         "-H", "Content-Type: application/json",
         "-d", json.dumps(payload)
     ]
-    ]
 
     try:
+        # Running the shell command securely on Render
         result = subprocess.run(command, capture_output=True, text=True, check=True)
         res_data = json.loads(result.stdout)
         
-        # Safe response parsing to avoid 'candidates' crash
+        # Safe response check to handle the output properly
         if "candidates" in res_data and len(res_data["candidates"]) > 0:
             script_text = res_data["candidates"][0]["content"]["parts"][0]["text"]
             return {"script": script_text}
