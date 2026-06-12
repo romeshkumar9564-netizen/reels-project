@@ -1,7 +1,6 @@
 import os
 import json
-import urllib.request
-import ssl
+import subprocess
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -29,37 +28,30 @@ async def make_script(request: TopicRequest):
     if not api_key:
         raise HTTPException(status_code=500, detail="API Key missing on Render!")
 
-    # Naye keys ke liye ekdum exact aur updated global v1beta endpoint format
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-    
     prompt = f"Write a highly engaging 30-second Instagram Reel script about the topic: '{request.topic}'. Language: Hinglish. Format with clear HOOK, BODY, and CTA."
 
+    # Google AI Studio Custom Command Line Safe Payload
     payload = {
         "contents": [{
             "parts": [{"text": prompt}]
         }]
     }
-    
-    data = json.dumps(payload).encode("utf-8")
-    
-    # SSL Validation Bypass for Cloud Environments
-    ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
-    
-    req = urllib.request.Request(
-        url, 
-        data=data, 
-        headers={
-            "Content-Type": "application/json"
-        }, 
-        method="POST"
-    )
+
+    # Direct System Bypass Request (Official cURL implementation via Python)
+    command = [
+        "curl",
+        "-X", "POST",
+        f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}",
+        "-H", "Content-Type: application/json",
+        "-d", json.dumps(payload)
+    ]
 
     try:
-        with urllib.request.urlopen(req, context=ctx) as response:
-            res_data = json.loads(response.read().decode("utf-8"))
-            script_text = res_data["candidates"][0]["content"]["parts"][0]["text"]
-            return {"script": script_text}
+        # Executing direct secure shell command on Render
+        result = subprocess.run(command, capture_output=True, text=True, check=True)
+        res_data = json.loads(result.stdout)
+        
+        script_text = res_data["candidates"][0]["content"]["parts"][0]["text"]
+        return {"script": script_text}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Google API Connection Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Google Gateway Network Error: {str(e)}")
