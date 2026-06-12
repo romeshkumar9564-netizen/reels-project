@@ -28,16 +28,15 @@ async def make_script(request: TopicRequest):
     if not api_key:
         raise HTTPException(status_code=500, detail="API Key missing on Render!")
 
-    prompt = f"Write a highly engaging 30-second Instagram Reel script about the topic: '{request.topic}'. Language: Hinglish. Format with clear HOOK, BODY, and CTA."
+    prompt = f"Write a 30-second Instagram Reel script about the topic: '{request.topic}'. Language: Hinglish."
 
-    # Google AI Studio Custom Command Line Safe Payload
+    # Standard production payload format for Gemini 1.5 Flash
     payload = {
         "contents": [{
             "parts": [{"text": prompt}]
         }]
     }
 
-    # Direct System Bypass Request (Official cURL implementation via Python)
     command = [
         "curl",
         "-X", "POST",
@@ -47,11 +46,17 @@ async def make_script(request: TopicRequest):
     ]
 
     try:
-        # Executing direct secure shell command on Render
         result = subprocess.run(command, capture_output=True, text=True, check=True)
         res_data = json.loads(result.stdout)
         
-        script_text = res_data["candidates"][0]["content"]["parts"][0]["text"]
-        return {"script": script_text}
+        # Safe response parsing to avoid 'candidates' crash
+        if "candidates" in res_data and len(res_data["candidates"]) > 0:
+            script_text = res_data["candidates"][0]["content"]["parts"][0]["text"]
+            return {"script": script_text}
+        elif "error" in res_data:
+            raise HTTPException(status_code=400, detail=f"Google API Error: {res_data['error']['message']}")
+        else:
+            raise HTTPException(status_code=500, detail=f"Unexpected Response: {result.stdout}")
+            
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Google Gateway Network Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Network Error: {str(e)}")
