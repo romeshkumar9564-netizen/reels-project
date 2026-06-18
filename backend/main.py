@@ -5,10 +5,8 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 import google.generativeai as genai
 
-# .env file load karne ke liye
 load_dotenv()
 
-# Gemini API Key configuration
 API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
     raise ValueError("GEMINI_API_KEY environment variable is missing!")
@@ -17,7 +15,6 @@ genai.configure(api_key=API_KEY)
 
 app = FastAPI()
 
-# Frontend se connect karne ke liye CORS settings
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -26,7 +23,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Frontend se aane wale data ka structure
 class ScriptRequest(BaseModel):
     topic: str
     duration: str
@@ -39,20 +35,36 @@ def home():
 @app.post("/generate-script")
 async def generate_script(request: ScriptRequest):
     try:
-        # Ek badhiya sa prompt design kiya hai
         prompt = (
             f"Create a high-engaging viral Instagram Reel script.\n"
             f"Topic/Niche: {request.topic}\n"
             f"Duration: {request.duration}\n"
             f"Tone of Voice: {request.tone}\n\n"
-            f"Please include visual cues (what to show on screen) and the exact voiceover text."
+            f"Please include visual cues and the exact voiceover text."
         )
 
-        # YAHAN BADLAV KIYA HAI: 'models/' hata kar seedha model ka naam likha hai
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        response = model.generate_content(prompt)
+        # AGAR RECENT GOOGLE PACKAGES HAIN TOH YEH BINAMODELS/ KE CHALEGA
+        # LEKIN SAFETY KE LIYE HUM DIRECT GENERATE_CONTENT USE KAR RAHE HAIN
+        response = genai.generate_text(
+            model="models/text-bison-001" if "text" in request.topic else "models/gemini-1.5-flash",
+            prompt=prompt
+        ) if hasattr(genai, 'generate_text') else None
+
+        if not response:
+            # Agar purana library configuration hai, toh bina 'models/' ya sirf model string try karte hain
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            response = model.generate_content(prompt)
         
         return {"script": response.text}
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        # AGAR FIR BHI ERROR AAYE TOH DIRECT STRING SE TRY KAREIN
+        try:
+            # Yeh aakhiri brahmastra hai bina kisi library validation ke
+            import requests
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
+            payload = {"contents": [{"parts":[{"text": prompt}]}]}
+            res = requests.post(url, json=payload)
+            return {"script": res.json()['candidates'][0]['content']['parts'][0]['text']}
+        except:
+            raise HTTPException(status_code=500, detail=str(e))
