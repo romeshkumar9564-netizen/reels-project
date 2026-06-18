@@ -2,66 +2,57 @@ import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import google.generativeai as genai
 from dotenv import load_dotenv
+import google.generativeai as genai
 
-# .env file load karne ke liye (Local testing ke liye zaroori hai)
+# .env file load karne ke liye
 load_dotenv()
 
-app = FastAPI(title="AI Reels Script Generator Backend")
+# Gemini API Key configuration
+API_KEY = os.getenv("GEMINI_API_KEY")
+if not API_KEY:
+    raise ValueError("GEMINI_API_KEY environment variable is missing!")
 
-# 1. CORS Setup (Yeh sabse important hai taaki aapka Android/iOS app backend se baat kar sake)
+genai.configure(api_key=API_KEY)
+
+app = FastAPI()
+
+# Frontend se connect karne ke liye CORS settings
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Production mein aap isko specific domains tak limit kar sakte hain
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # Sabhi HTTP methods (GET, POST, etc.) allow karne ke liye
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 2. Gemini API Configuration
-# Render par hum 'GEMINI_API_KEY' naam ka environment variable set karenge
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
-if not GEMINI_API_KEY:
-    print("Warning: GEMINI_API_KEY nahi mila! Render Environment Variables mein add karein.")
-else:
-    genai.configure(api_key=GEMINI_API_KEY)
-
-# Frontend se aane waale data ka structure (Schema)
+# Frontend se aane wale data ka structure
 class ScriptRequest(BaseModel):
     topic: str
-    duration: str = "30 Seconds"
-    tone: str = "Energetic & Aggressive"
+    duration: str
+    tone: str
 
-# 3. Health Check Route (UptimeRobot/Cron-job isi route ko ping karega server jagane ke liye)
 @app.get("/")
 def home():
-    return {"status": "healthy", "message": "AI Reels Script Generator Backend is Running!"}
+    return {"status": "Server is running smoothly!"}
 
-# 4. Main Script Generation Route
 @app.post("/generate-script")
 async def generate_script(request: ScriptRequest):
-    if not GEMINI_API_KEY:
-        raise HTTPException(status_code=500, detail="API Key configured nahi hai server par.")
-    
     try:
-        # Prompt engineering: Jo preferences user select karega uske mutabik prompt banega
-        prompt = f"Create a highly engaging {request.duration} Instagram Reel script on the topic: '{request.topic}'. The tone should be {request.tone}. The script must be in Hinglish, with clear visual cues and voiceover text formatted nicely."
-        
-        # Gemini 1.5 Flash model call (Fast aur cost-effective hai)
+        # Ek badhiya sa prompt design kiya hai
+        prompt = (
+            f"Create a high-engaging viral Instagram Reel script.\n"
+            f"Topic/Niche: {request.topic}\n"
+            f"Duration: {request.duration}\n"
+            f"Tone of Voice: {request.tone}\n\n"
+            f"Please include visual cues (what to show on screen) and the exact voiceover text."
+        )
+
+        # YAHAN BADLAV KIYA HAI: 'models/' hata kar seedha model ka naam likha hai
         model = genai.GenerativeModel("gemini-1.5-flash")
         response = model.generate_content(prompt)
         
         return {"script": response.text}
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Script generate karne mein dikkat aayi: {str(e)}")
 
-# 5. Render/Production Dynamic Port Handling
-if __name__ == "__main__":
-    import uvicorn
-    # Render automatically ek PORT assign karta hai, agar na mile toh default 8000 use hoga
-    port = int(os.environ.get("PORT", 8000))
-    # host '0.0.0.0' hona compulsory hai Render par deploy karne ke liye
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
