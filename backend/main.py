@@ -3,20 +3,20 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import google.generativeai as genai
-from dotenv import load_model  # env file load karne ke liye (agar use kar rahe ho)
+from dotenv import load_dotenv  # Yeh ekdum sahi line hai!
 
+# .env file se variables load karne ke liye
 load_dotenv()
 
-# API Key ko secure tarike se read karna (Render environment variable se)
-# Agar local pe check kar rahe ho toh yahan direct apni key string bhi daal sakte ho: "AQ.Ab8RN6...""
-# Ab code mein koi direct key nahi hai, GitHub ise block nahi karega
-API_KEY = os.getenv("GEMINI_API_KEY")
-# Purane SDK (google-generativeai) ke hisab se configure karein
+# API Key ko Render environment variable se read karna
+API_KEY = os.getenv("GEMINI_API_KEY", "AQ.Ab8RN6Jz2At2SRyPGmbG74QYUXiuNnzFtCAP9jG48HMEvvQJ3A")
+
+# Gemini SDK ko configure karein
 genai.configure(api_key=API_KEY)
 
 app = FastAPI()
 
-# Frontend connectivity ke liye CORS Middleware
+# Android App aur Website dono se connect karne ke liye CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -45,7 +45,7 @@ async def generate_script(request: ScriptRequest):
             f"script should be {request.tone}. Make it engaging and ready for social media."
         )
         
-        # Purane SDK ke tarike se Gemini model initialize karein
+        # Gemini model initialize karein
         model = genai.GenerativeModel('gemini-1.5-flash')
         response = model.generate_content(prompt)
         
