@@ -2,20 +2,21 @@ import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from dotenv import load_dotenv
 import google.generativeai as genai
+from dotenv import load_model  # env file load karne ke liye (agar use kar rahe ho)
 
 load_dotenv()
 
-API_KEY = os.getenv("GEMINI_API_KEY")
-if not API_KEY:
-    raise ValueError("GEMINI_API_KEY environment variable is missing!")
+# API Key ko secure tarike se read karna (Render environment variable se)
+# Agar local pe check kar rahe ho toh yahan direct apni key string bhi daal sakte ho: "AQ.Ab8RN6...""
+API_KEY = os.getenv("GEMINI_API_KEY", "AQ.Ab8RN6Jz2At2SRyPGmbG74QYUXiuNnzFtCAP9jG48HMEvvQJ3A")
 
-# Yahan humne api_version ko explicit 'v1' set kiya hai taaki v1beta ka lafda khatam ho
-genai.configure(api_key=API_KEY, transport='rest')
+# Purane SDK (google-generativeai) ke hisab se configure karein
+genai.configure(api_key=API_KEY)
 
 app = FastAPI()
 
+# Frontend connectivity ke liye CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -24,6 +25,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Frontend se aane wale data ka structure
 class ScriptRequest(BaseModel):
     topic: str
     duration: str
@@ -31,36 +33,30 @@ class ScriptRequest(BaseModel):
 
 @app.get("/")
 def home():
-    return {"status": "Server is running smoothly!"}
+    return {"status": "Server is running smoothly on Render!"}
 
 @app.post("/generate-script")
 async def generate_script(request: ScriptRequest):
     try:
+        # Prompt taiyar karein
         prompt = (
-            f"Create a high-engaging viral Instagram Reel script.\n"
-            f"Topic/Niche: {request.topic}\n"
-            f"Duration: {request.duration}\n"
-            f"Tone of Voice: {request.tone}\n\n"
-            f"Please include visual cues and the exact voiceover text."
+            f"Write a short video/reel script on the topic: '{request.topic}'. "
+            f"The duration should be around {request.duration} and the tone of the "
+            f"script should be {request.tone}. Make it engaging and ready for social media."
         )
-
-        # Direct REST API call (Brahmastra) jo Google ke rules ko bypass karega
-        import requests
-        # v1beta ki jagah hum direct v1 stable use kar rahe hain jahan gemini-1.5-flash standard hai
-        url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={API_KEY}"
-        payload = {"contents": [{"parts":[{"text": prompt}]}]}
         
-        res = requests.post(url, json=payload)
-        res_data = res.json()
-
-        if "candidates" in res_data:
-            script_text = res_data['candidates'][0]['content']['parts'][0]['text']
-            return {"script": script_text}
-        else:
-            # Fallback agar koi dikkat aaye
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            response = model.generate_content(prompt)
-            return {"script": response.text}
-
+        # Purane SDK ke tarike se Gemini model initialize karein
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        response = model.generate_content(prompt)
+        
+        if not response.text:
+            raise HTTPException(status_code=500, detail="Failed to generate content from Gemini.")
+            
+        return {
+            "success": True,
+            "topic": request.topic,
+            "script": response.text
+        }
+        
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

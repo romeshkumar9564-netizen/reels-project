@@ -3,225 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Reels Script Generator</title>
+    <title>AI Reels Script Generator ✨</title>
     <style>
-        body {
-            margin: 0;
-            padding: 20px;
-            background-color: #0b0f19;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            color: #fff;
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #0f172a; 
+            color: #f8fafc; 
+            max-width: 650px; 
+            margin: 40px auto; 
+            padding: 20px; 
         }
-
-        .container {
-            max-width: 500px;
-            width: 100%;
-            background-color: #1e293b;
-            padding: 25px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            box-sizing: border-box;
+        .container { 
+            background-color: #1e293b; 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); 
         }
-
-        h1 {
-            text-align: center;
-            color: #38bdf8;
-            margin-bottom: 25px;
-            font-size: 24px;
+        h2 { 
+            text-align: center; 
+            color: #38bdf8; 
+            margin-bottom: 25px; 
+            font-size: 28px;
         }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #94a3b8;
+        .form-group { 
+            margin-bottom: 20px; 
         }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #334155;
-            border-radius: 8px;
-            background-color: #0f172a;
-            color: #fff;
-            font-size: 16px;
-            box-sizing: border-box;
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: 600; 
+            color: #cbd5e1; 
         }
-
+        input, select { 
+            width: 100%; 
+            padding: 12px; 
+            border-radius: 6px; 
+            border: 1px solid #475569; 
+            background-color: #0f172a; 
+            color: white; 
+            box-sizing: border-box; 
+            font-size: 15px;
+        }
         input:focus, select:focus {
             outline: none;
             border-color: #38bdf8;
         }
-
-        button {
-            width: 100%;
-            padding: 14px;
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.2s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            background-color: #2563eb; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: background 0.2s; 
+            margin-top: 10px; 
         }
-
-        button:hover {
-            background-color: #1d4ed8;
+        button:hover { 
+            background-color: #1d4ed8; 
         }
-
-        button:disabled {
-            background-color: #64748b;
-            cursor: not-allowed;
+        button:disabled { 
+            background-color: #64748b; 
+            cursor: not-allowed; 
         }
-
-        .output-box {
-            margin-top: 25px;
-            padding: 15px;
-            background-color: #0f172a;
-            border-left: 4px solid #38bdf8;
-            border-radius: 4px;
-            white-space: pre-wrap; /* Script ke enters aur spaces maintain rakhne ke liye */
-            display: none;
-            color: #e2e8f0;
-            font-size: 15px;
+        #outputBox { 
+            margin-top: 25px; 
+            padding: 20px; 
+            background-color: #0f172a; 
+            border-left: 4px solid #38bdf8; 
+            border-radius: 6px; 
+            white-space: pre-wrap; 
+            display: none; 
             line-height: 1.6;
-        }
-
-        .render-note {
-            margin-top: 15px;
-            padding: 12px;
-            background-color: #111827;
-            border-left: 4px solid #0ea5e9;
-            border-radius: 4px;
-            font-size: 13px;
-            color: #9ca3af;
-            line-height: 1.4;
-        }
-
-        /* Simple CSS Loader */
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3498db;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            animation: spin 1s linear infinite;
-            display: none;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            font-size: 15px;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Reels Script Generator ✨</h1>
-
-        <label for="topic">Video Topic / Niche:</label>
-        <input type="text" id="topic" placeholder="e.g., How hackers bypass basic passwords">
-
-        <label for="duration">Video Duration:</label>
-        <select id="duration">
-            <option value="30 Seconds">30 Seconds</option>
-            <option value="60 Seconds">60 Seconds</option>
-            <option value="15 Seconds">15 Seconds</option>
-        </select>
-
-        <label for="tone">Tone of Voice:</label>
-        <select id="tone">
-            <option value="Energetic & Aggressive">Energetic & Aggressive</option>
-            <option value="Calm & Educational">Calm & Educational</option>
-            <option value="Funny & Witty">Funny & Witty</option>
-        </select>
-
-        <button id="generateBtn" onclick="generateScript()">
-            <span class="spinner" id="btnSpinner"></span>
-            <span id="btnText">Generate Script ✨</span>
-        </button>
-
-        <div class="render-note">
-            Live Render Server takes up to 50 seconds to boot up on the first request. Please wait a moment if it's the first try!
+        <h2>Reels Script Generator ✨</h2>
+        
+        <div class="form-group">
+            <label>Video Topic / Niche:</label>
+            <input type="text" id="topicInput" placeholder="e.g., How hackers bypass basic passwords...">
         </div>
 
-        <div class="output-box" id="outputBox"></div>
+        <div class="form-group">
+            <label>Video Duration:</label>
+            <select id="durationInput">
+                <option value="15 Seconds">15 Seconds</option>
+                <option value="30 Seconds" selected>30 Seconds</option>
+                <option value="60 Seconds">60 Seconds</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Tone of Voice:</label>
+            <select id="toneInput">
+                <option value="Energetic & Aggressive">Energetic & Aggressive</option>
+                <option value="Calm & Informative">Calm & Informative</option>
+                <option value="Humorous & Witty">Humorous & Witty</option>
+            </select>
+        </div>
+
+        <button id="generateBtn" onclick="generateScript()">Generate Script ✨</button>
+
+        <div id="outputBox"></div>
     </div>
 
     <script>
-        async function generateScript() {
-            const topicInput = document.getElementById('topic').value.trim();
-            const durationInput = document.getElementById('duration').value;
-            const toneInput = document.getElementById('tone').value;
-            
-            const outputBox = document.getElementById('outputBox');
-            const generateBtn = document.getElementById('generateBtn');
-            const btnSpinner = document.getElementById('btnSpinner');
-            const btnText = document.getElementById('btnText');
+        // Aapki original original key pehle se hi set kar di hai bhai
+        const API_KEY = "AQ.Ab8RN6Jz2At2SRyPGmbG74QYUXiuNnzFtCAP9jG48HMEvvQJ3A";
 
-            // Validation: Agar topic khali ho
+        async function generateScript() {
+            const topicInput = document.getElementById('topicInput').value.trim();
+            const durationInput = document.getElementById('durationInput').value;
+            const toneInput = document.getElementById('toneInput').value;
+            const btn = document.getElementById('generateBtn');
+            const outputBox = document.getElementById('outputBox');
+
             if (!topicInput) {
-                alert("Please enter a video topic first!");
+                alert("Pehle koi topic toh daalo, bhai!");
                 return;
             }
 
-            // UI Loading State ON
-            generateBtn.disabled = true;
-            btnSpinner.style.display = "inline-block";
-            btnText.innerText = "Generating Script...";
+            btn.disabled = true;
+            btn.innerText = "Generating Script...";
             outputBox.style.display = "none";
 
-            // IMPORTANT: Jab Render deploy ho jaye, 'https://your-app-name.onrender.com' se replace karein
-            // Local test ke liye aap 'http://127.0.0.1:8000/generate-script' rakh sakte hain
-            const BACKEND_URL = 'https://reels-project.onrender.com/generate-script';
+            const prompt = `Create a high-engaging viral Instagram Reel script. Topic/Niche: ${topicInput}, Duration: ${durationInput}, Tone of Voice: ${toneInput}. Include visual cues and voiceover text.`;
+
+            // Stable v1 Endpoint with Google's latest gemini-2.5-flash model
+            const URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
 
             try {
-                const response = await fetch(BACKEND_URL, {
+                const response = await fetch(URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        topic: topicInput,
-                        duration: durationInput,
-                        tone: toneInput
+                        contents: [{ parts: [{ text: prompt }] }]
                     })
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Success: Script dikhayein
-                    outputBox.innerText = data.script;
                     outputBox.style.display = "block";
+                    outputBox.innerText = data.candidates[0].content.parts[0].text;
                 } else {
-                    // Server Error handling
-                    alert("Server Error: " + (data.detail || "Something went wrong"));
+                    alert("Google API Error: " + (data.error?.message || "Kuch dikkat hai. Key ya model check karein!"));
                 }
-
             } catch (error) {
-                // Network Error handling
-                console.error("Error fetching script:", error);
-                alert("Network error! Make sure your Render server is live.");
+                alert("Network Error: " + error.message);
             } finally {
-                // UI Loading State OFF
-                generateBtn.disabled = false;
-                btnSpinner.style.display = "none";
-                btnText.innerText = "Generate Script ✨";
+                btn.disabled = false;
+                btn.innerText = "Generate Script ✨";
             }
         }
     </script>
-
 </body>
 </html>
