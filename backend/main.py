@@ -9,8 +9,8 @@ load_dotenv()
 
 # API Key ko secure tarike se read karna (Render environment variable se)
 # Agar local pe check kar rahe ho toh yahan direct apni key string bhi daal sakte ho: "AQ.Ab8RN6...""
-API_KEY = os.getenv("GEMINI_API_KEY", "AQ.Ab8RN6Jz2At2SRyPGmbG74QYUXiuNnzFtCAP9jG48HMEvvQJ3A")
-
+# Ab code mein koi direct key nahi hai, GitHub ise block nahi karega
+API_KEY = os.getenv("GEMINI_API_KEY")
 # Purane SDK (google-generativeai) ke hisab se configure karein
 genai.configure(api_key=API_KEY)
 
