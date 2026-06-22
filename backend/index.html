@@ -68,16 +68,69 @@
             background-color: #64748b; 
             cursor: not-allowed; 
         }
+
+        /* 🌀 LOADING WHEEL (SPINNER) CSS */
+        .loader-container {
+            display: none; 
+            justify-content: center;
+            align-items: center;
+            margin-top: 25px;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #475569; 
+            border-top: 5px solid #38bdf8; 
+            border-radius: 50%;
+            animation: spin 1s linear infinite; 
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 📝 OUTPUT & BUTTONS CONTAINER */
+        .output-container {
+            display: none;
+            margin-top: 25px;
+        }
         #outputBox { 
-            margin-top: 25px; 
             padding: 20px; 
             background-color: #0f172a; 
             border-left: 4px solid #38bdf8; 
             border-radius: 6px; 
             white-space: pre-wrap; 
-            display: none; 
             line-height: 1.6;
             font-size: 15px;
+        }
+
+        /* 🔢 COUNTER BOX STYLE */
+        .counter-box {
+            display: flex;
+            justify-content: space-between;
+            background-color: #0f172a;
+            padding: 8px 12px;
+            font-size: 13px;
+            color: #94a3b8;
+            border-bottom: 1px solid #334155;
+            border-radius: 6px 6px 0 0;
+        }
+
+        /* 📋 ACTION BUTTONS STYLE */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .btn-action {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+            background-color: #334155;
+            border: 1px solid #475569;
+        }
+        .btn-action:hover {
+            background-color: #475569;
         }
     </style>
 </head>
@@ -111,11 +164,26 @@
 
         <button id="generateBtn" onclick="generateScript()">Generate Script ✨</button>
 
-        <div id="outputBox"></div>
+        <div class="loader-container" id="loadingLoader">
+            <div class="spinner"></div>
+        </div>
+
+        <div class="output-container" id="outputWrapper">
+            <div class="counter-box">
+                <span id="wordCount">Words: 0</span>
+                <span id="charCount">Characters: 0</span>
+            </div>
+            <div id="outputBox"></div>
+            
+            <div class="action-buttons">
+                <button class="btn-action" id="copyBtn" onclick="copyToClipboard()">📋 Copy Script</button>
+                <button class="btn-action" onclick="downloadScript()">📥 Download .txt</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Aapki original original key pehle se hi set kar di hai bhai
+        // Aapki original API key
         const API_KEY = "AQ.Ab8RN6Jz2At2SRyPGmbG74QYUXiuNnzFtCAP9jG48HMEvvQJ3A";
 
         async function generateScript() {
@@ -123,7 +191,9 @@
             const durationInput = document.getElementById('durationInput').value;
             const toneInput = document.getElementById('toneInput').value;
             const btn = document.getElementById('generateBtn');
+            const outputWrapper = document.getElementById('outputWrapper');
             const outputBox = document.getElementById('outputBox');
+            const loader = document.getElementById('loadingLoader');
 
             if (!topicInput) {
                 alert("Pehle koi topic toh daalo, bhai!");
@@ -132,11 +202,10 @@
 
             btn.disabled = true;
             btn.innerText = "Generating Script...";
-            outputBox.style.display = "none";
+            outputWrapper.style.display = "none";
+            loader.style.display = "flex"; 
 
             const prompt = `Create a high-engaging viral Instagram Reel script. Topic/Niche: ${topicInput}, Duration: ${durationInput}, Tone of Voice: ${toneInput}. Include visual cues and voiceover text.`;
-
-            // Stable v1 Endpoint with Google's latest gemini-2.5-flash model
             const URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
 
             try {
@@ -149,19 +218,67 @@
                 });
 
                 const data = await response.json();
+                loader.style.display = "none";
 
                 if (response.ok) {
-                    outputBox.style.display = "block";
-                    outputBox.innerText = data.candidates[0].content.parts[0].text;
+                    const scriptText = data.candidates[0].content.parts[0].text;
+                    
+                    // Display Output Wrapper
+                    outputWrapper.style.display = "block";
+                    outputBox.innerText = scriptText;
+
+                    // Update Counters 🔢
+                    updateCounters(scriptText);
+
                 } else {
                     alert("Google API Error: " + (data.error?.message || "Kuch dikkat hai. Key ya model check karein!"));
                 }
             } catch (error) {
+                loader.style.display = "none"; 
                 alert("Network Error: " + error.message);
             } finally {
                 btn.disabled = false;
                 btn.innerText = "Generate Script ✨";
             }
+        }
+
+        // 🔢 Counter Function
+        function updateCounters(text) {
+            const charCount = text.length;
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+            const wordCount = words.length;
+
+            document.getElementById('charCount').innerText = `Characters: ${charCount}`;
+            document.getElementById('wordCount').innerText = `Words: ${wordCount}`;
+        }
+
+        // 📋 Copy to Clipboard Function
+        function copyToClipboard() {
+            const scriptText = document.getElementById('outputBox').innerText;
+            const copyBtn = document.getElementById('copyBtn');
+            
+            navigator.clipboard.writeText(scriptText).then(() => {
+                copyBtn.innerText = "✅ Copied!";
+                setTimeout(() => {
+                    copyBtn.innerText = "📋 Copy Script";
+                }, 2000);
+            }).catch(err => {
+                alert("Copy nahi ho paya, manually select karein!");
+            });
+        }
+
+        // 📥 Download as .txt File Function
+        function downloadScript() {
+            const scriptText = document.getElementById('outputBox').innerText;
+            const topic = document.getElementById('topicInput').value.trim() || "reels-script";
+            
+            const element = document.createElement("a");
+            const file = new Blob([scriptText], {type: 'text/plain'});
+            element.href = URL.createObjectURL(file);
+            element.download = `${topic.replace(/\s+/g, '_')}_script.txt`;
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
         }
     </script>
 </body>
