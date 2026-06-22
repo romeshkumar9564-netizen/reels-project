@@ -183,7 +183,7 @@
     </div>
 
     <script>
-        // Aapki original API key
+        // Aapki original key jo humne pehle check ki thi
         const API_KEY = "AQ.Ab8RN6Jz2At2SRyPGmbG74QYUXiuNnzFtCAP9jG48HMEvvQJ3A";
 
         async function generateScript() {
@@ -223,7 +223,6 @@
                 if (response.ok) {
                     const scriptText = data.candidates[0].content.parts[0].text;
                     
-                    // Display Output Wrapper
                     outputWrapper.style.display = "block";
                     outputBox.innerText = scriptText;
 
