@@ -1,19 +1,20 @@
 import os
-from flask import Flask, send_from_directory
+from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
-app = Flask(__name__)
+app = FastAPI()
 
-# Static files aur index.html serve karne ke liye route
-@app.route('/')
-def index():
-    return send_from_directory('.', 'index.html')
+# index.html serve karne ke liye route
+@app.get("/")
+async def read_index():
+    return FileResponse("index.html")
 
-# Agar folder mein aur koi files hain unhe serve karne ke liye
-@app.route('/<path:path>')
-def static_files(path):
-    return send_from_directory('.', path)
+# Agar koi aur static files/assets hain unke liye setup
+if os.path.exists("static"):
+    app.mount("/static", StaticFiles(directory="static"), name="static")
 
-if __name__ == '__main__':
-    # Render ya local host dono par chalne ke liye port configuration
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 10000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
